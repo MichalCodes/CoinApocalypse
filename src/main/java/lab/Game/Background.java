@@ -4,19 +4,21 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import lab.Database;
 import lab.interfaces.GameBackground;
+import java.sql.Connection;
+import java.sql.SQLException;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-
-public class Background implements GameBackground {
+public class Background implements GameBackground{
     private final Image image1, image2;
+    private final Connection connection;
     private final Image srdce;
     private String coinNumber;
-    private int lifes, addedBackground;
+    private int lifes;
+    private int addedBackground;
     private boolean block;
-    public Background(double width, double height){
+    public Background(double width, double height, Connection connection) throws SQLException {
+        this.connection = connection;
         this.block = false;
         this.addedBackground = 1;
         this.getData();
@@ -49,7 +51,7 @@ public class Background implements GameBackground {
         gc.fillText(coinNumber, 590, 40);
     }
     @Override
-    public void draw(GraphicsContext gc){
+    public void draw(GraphicsContext gc) throws SQLException {
         gc.setFont(Font.font(25));
         gc.setFill(Color.GREEN);
         gc.fillRect(0, 0, 500, 50);
@@ -76,12 +78,8 @@ public class Background implements GameBackground {
         gc.fillText(coinNumber, 590, 40);
         gc.restore();
     }
-    private void getData(){
-        try (BufferedReader br = new BufferedReader(new FileReader("mem.txt"))) {
-            String l1 = br.readLine();
-            addedBackground = Integer.parseInt(String.valueOf(l1.charAt(4)));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    private void getData() throws SQLException {
+        int[] upgrades = Database.selectUserUpdates(connection);
+        addedBackground = upgrades[2];
     }
 }

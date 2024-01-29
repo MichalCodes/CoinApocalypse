@@ -8,19 +8,20 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import lab.interfaces.StaticScreens;
-
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
+import lab.Database;
 
-
-public class TopScores implements StaticScreens {
+public class TopScores implements StaticScreens{
     private final Image image;
+    private final Connection conection;
     private final Button back = new Button("Back to menu");
     private boolean goBack, block;
     private final Group root;
-    private final int[] top5;
-    TopScores(Group root) {
+    private int[] top5;
+    TopScores(Connection conection, Group root) {
+        this.conection = conection;
         this.root = root;
         this.image = new Image("upgrades.png", root.getScene().getWidth() , root.getScene().getHeight(), true, true);
         setButtons();
@@ -36,7 +37,7 @@ public class TopScores implements StaticScreens {
         return i;
     }
     @Override
-    public void draw(GraphicsContext gc) throws IOException {
+    public void draw(GraphicsContext gc) throws IOException, SQLException {
         gc.drawImage(image, 0,0, root.getScene().getWidth(), root.getScene().getHeight());
         gc.setFill(Color.YELLOW);
         gc.setFont(Font.font("Calibri",FontWeight.BOLD, 20));
@@ -63,14 +64,7 @@ public class TopScores implements StaticScreens {
         back.setPrefHeight(50);
         back.setStyle("-fx-background-color: yellow;");
     }
-    private void bestSc(){
-        try (BufferedReader br = new BufferedReader(new FileReader("mem.txt"))) {
-            br.readLine();
-            for(int i = 0; i < 5; i++){
-                this.top5[i] = Integer.parseInt(br.readLine());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    private void bestSc() throws SQLException {
+        top5 = Database.selectScores(conection);
     }
 }

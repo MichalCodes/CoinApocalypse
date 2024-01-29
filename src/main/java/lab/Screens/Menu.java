@@ -5,14 +5,18 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
+import lab.Database;
 import lab.Game.Game;
 import lab.interfaces.GameController;
 import lab.interfaces.StaticScreens;
-
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
 public class Menu implements StaticScreens {
     private final GameController game;
+    private final Connection conection;
     private final Canvas canvas;
     private final StaticScreens gameOver,  upgrades, topScore;
     private final Image menu;
@@ -21,28 +25,40 @@ public class Menu implements StaticScreens {
     private final Button topScores = new Button("Top scores");
     private final Button upgrade = new Button("Upgrade");
     private final Group root;
-    public Menu(Canvas canvas){
+    public Menu(Canvas canvas) throws SQLException {
+        this.conection = DriverManager.getConnection("jdbc:h2:./scoreDB;AUTO_SERVER=TRUE");
+        Database.createDefaults(conection);
+        if(Database.find(conection) < 1){
+            Database.insertUser(conection);
+        }
         this.canvas = canvas;
         this.root = (Group) canvas.getScene().getRoot();
-        this.game = new Game(canvas);
-        this.gameOver = new GameOverScreen(canvas, (Game) game);
+        this.game = new Game(canvas, conection);
+        this.gameOver = new GameOverScreen(canvas, (Game) game, conection);
         menu = new Image("menu.png", canvas.getWidth(), canvas.getHeight(), true, true);
         this.gameWasStarted = false;
         this.block = false;
-        this.upgrades = new Upgrade(root);
-        this.topScore = new TopScores(root);
+        this.upgrades = new Upgrade(root, conection);
+        this.topScore = new TopScores(conection, root);
         setButtons();
+
     }
     @Override
     public int checkMouseEvents() {
-        play.setOnAction(e -> {gameWasStarted = true; game.newGame();});
+        play.setOnAction(e -> {gameWasStarted = true;
+            try {
+                game.newGame();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
         upgrade.setOnAction(e -> {showUpgrades = true;});
         topScores.setOnAction(e -> showTopScores = true);
         return 0;
     }
 
     @Override
-    public void draw(GraphicsContext gc) throws IOException {
+    public void draw(GraphicsContext gc) throws IOException, SQLException {
         //zmeny
         int eventNumber = gameOver.checkMouseEvents();
         if (eventNumber == 1){

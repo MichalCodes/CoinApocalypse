@@ -5,14 +5,14 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import lab.Screens.Menu;
 import lab.interfaces.StaticScreens;
-
 import java.io.IOException;
+import java.sql.SQLException;
 
 public class DrawingThread extends AnimationTimer {
 	private final GraphicsContext gc;
 	private final StaticScreens menu;
 
-	public DrawingThread(Canvas canvas) {
+	public DrawingThread(Canvas canvas) throws SQLException {
 		this.gc = canvas.getGraphicsContext2D();
 		this.menu = new Menu(canvas);
 	}
@@ -24,10 +24,10 @@ public class DrawingThread extends AnimationTimer {
 	public void handle(long now) {
 		try {
 			menu.draw(gc);
-		} catch (IOException e) {
+		} catch (IOException | SQLException e) {
 			throw new RuntimeException(e);
 		}
-		menu.checkMouseEvents();
+        menu.checkMouseEvents();
 		Routines.sleep(7);
 	}
 }

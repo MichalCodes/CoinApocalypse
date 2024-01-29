@@ -6,9 +6,14 @@ import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import lab.Database;
 import lab.interfaces.StaticScreens;
 
 import java.io.*;
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import static lab.Database.selectUserCoins;
 
 public class Upgrade implements StaticScreens {
     private final Button upgradeCoins = new Button("Upgrade coins");
@@ -17,15 +22,17 @@ public class Upgrade implements StaticScreens {
     private final Button addBackground = new Button("Add background");
     private final Button back = new Button("Back to menu");
     private final Group root;
-    private boolean block, goBack, rst;
+    private boolean block;
+    private boolean goBack;
     private final Image image;
     private int coins, coinUpgradeLevel, speedUpgradeLevel, addedBackground;
-    Upgrade(Group root){
+    private final Connection connection;
+    Upgrade(Group root, Connection connection) throws SQLException {
         this.root = root;
         this.image = new Image("upgrades.png", root.getScene().getWidth() , root.getScene().getHeight(), true, true);
+        this.connection = connection;
         this.setButtons();
         this.coins = 0;
-        this.rst = false;
         getData();
     }
     @Override
@@ -47,7 +54,6 @@ public class Upgrade implements StaticScreens {
             coinUpgradeLevel = 1;
             speedUpgradeLevel = 1;
             addedBackground = 1;
-            rst = true;
         });
         addBackground.setOnAction(e-> {
             if(addedBackground < 2 && coins > 10000){
@@ -61,13 +67,13 @@ public class Upgrade implements StaticScreens {
         goBack = false;
         try {
             setData(coins, coinUpgradeLevel, speedUpgradeLevel, addedBackground);
-        } catch (IOException e) {
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
         return i;
     }
     @Override
-    public void draw(GraphicsContext gc) throws IOException {
+    public void draw(GraphicsContext gc) throws IOException, SQLException {
         gc.clearRect(0,0,1000, 550);
         gc.drawImage(image, 0,0, root.getScene().getWidth(), root.getScene().getHeight());
         gc.setFill(Color.GREEN);
@@ -89,7 +95,6 @@ public class Upgrade implements StaticScreens {
         if(addedBackground < 2){
             gc.fillText("cost: " + 10000, 500, 400);
         }
-
         if(!block){
             getData();
             root.getChildren().add(upgradeSpeed);
@@ -104,7 +109,7 @@ public class Upgrade implements StaticScreens {
     public void removeButtons() {
         try {
             setData(coins, coinUpgradeLevel, speedUpgradeLevel, addedBackground);
-        } catch (IOException e) {
+        }catch (SQLException e) {
             throw new RuntimeException(e);
         }
         root.getChildren().remove(upgradeCoins);
@@ -114,43 +119,17 @@ public class Upgrade implements StaticScreens {
         root.getChildren().remove(back);
         block = false;
     }
-    private void getData() {
-        try (BufferedReader br = new BufferedReader(new FileReader("mem.txt"))) {
-            String l1 = br.readLine();
-            coinUpgradeLevel = Integer.parseInt(String.valueOf(l1.charAt(0)));
-            speedUpgradeLevel = Integer.parseInt(String.valueOf(l1.charAt(2)));
-            addedBackground = Integer.parseInt(String.valueOf(l1.charAt(4)));
-            for (int i = 0; i < 5; i++) {
-                br.readLine();
-            }
-            coins = Integer.parseInt(br.readLine());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    private void getData() throws SQLException {
+        int[] numbers;
+        numbers = Database.selectUserUpdates(connection);
+        coins = selectUserCoins(connection);
+        coinUpgradeLevel = numbers[0];
+        speedUpgradeLevel = numbers[1];
+        addedBackground = numbers[2];
     }
-    private void setData(int n, int CoinLvl, int speedLvl, int addedlvl) throws IOException {
-        String[] specificLine = new String[8];
-        BufferedReader br = new BufferedReader(new FileReader("mem.txt"));
-        for(int i = 0; i < 8; i++){
-            specificLine[i] = br.readLine();
-        }
-        coins = Integer.parseInt(specificLine[6]);
-        BufferedWriter bw = new BufferedWriter(new FileWriter("mem.txt"));
-        coinUpgradeLevel = CoinLvl;
-        speedUpgradeLevel = speedLvl;
-        addedBackground = addedlvl;
-        bw.write(Math.abs(coinUpgradeLevel) + "," + Math.abs(speedUpgradeLevel) + "," + Math.abs(addedBackground) + "\n");
-        for(int i = 1; i < 6; i++){
-            if(rst){
-                bw.write(0 + "\n");
-            } else{
-                bw.write(specificLine[i] + "\n");
-            }
-        }
-        rst = false;
-        coins = n;
-        bw.write(Integer.toString(Math.abs(coins)));
-        bw.close();
+    private void setData(int n, int CoinLvl, int speedLvl, int addedlvl) throws SQLException {
+        Database.updateUserCoins(connection, n);
+        Database.updateUserlvls(connection, CoinLvl, speedLvl, addedlvl);
     }
     private void setButtons(){
         addBackground.setLayoutX(500);

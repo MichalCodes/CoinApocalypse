@@ -8,6 +8,11 @@ import javafx.scene.canvas.Canvas;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 /**
  *  Class <b>App</b> - extends class Application and it is an entry point of the program
  * @author     Java I
@@ -17,7 +22,7 @@ public class App extends Application {
 	public static void main(String[] args) {
 		launch(args);
 	}
-	private Canvas canvas;
+
 	private AnimationTimer timer;
 	
 	@Override
@@ -25,7 +30,7 @@ public class App extends Application {
 		try {
 			//Construct a main window with a canvas.  
 			Group root = new Group();
-			canvas = new Canvas(1000, 550);
+			Canvas canvas = new Canvas(1000, 550);
 			root.getChildren().add(canvas);
 			Scene scene = new Scene(root, 1000, 550);
 			scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());

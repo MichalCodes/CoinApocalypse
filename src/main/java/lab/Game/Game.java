@@ -4,6 +4,7 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
+import lab.Database;
 import lab.interfaces.GameBackground;
 import lab.interfaces.GameController;
 import lab.interfaces.MovingObjects;
@@ -11,6 +12,8 @@ import lab.interfaces.MovingObjects;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -24,12 +27,14 @@ public class Game implements GameController {
     private final ArrayList<MovingObjects> coins = new ArrayList<>();
     private final Image fireballImage, coinImage;
     private final Random rand = new Random();
+    private final Connection connection;
     private boolean end;
-    public Game(Canvas canvas){
+    public Game(Canvas canvas, Connection connection) throws SQLException {
         this.fireballImage = new Image(getClass().getResourceAsStream("fire-fireball.gif"), 50, 50, true, true);
         this.coinImage = new Image(getClass().getResourceAsStream("coin.gif"), 50, 50, true, true);
         this.canvas = canvas;
-        this.background = new Background(canvas.getWidth(), canvas.getHeight());
+        this.background = new Background(canvas.getWidth(), canvas.getHeight(), connection);
+        this.connection = connection;
         this.ufon = new Ufon();
         this.ufoSpeed = 1;
         this.scene = canvas.getScene();
@@ -58,7 +63,7 @@ public class Game implements GameController {
         return this.end;
     }
     @Override
-    public void draw(Canvas canvas){
+    public void draw(Canvas canvas) throws SQLException {
         if(background.getLifes() == 0){
             this.end = true;
         }
@@ -123,7 +128,7 @@ public class Game implements GameController {
         }
     }
     @Override
-    public void newGame(){
+    public void newGame() throws SQLException {
         background.resetLifes();
         many = 0;
         score = 0;
@@ -138,16 +143,10 @@ public class Game implements GameController {
     @Override
     public int getScore(){return  this.score; }
 
-    private void getData() {
-        try (BufferedReader br = new BufferedReader(new FileReader("mem.txt"))) {
-            String l1 = br.readLine();
-            coinUpgradeLevel = Integer.parseInt(String.valueOf(l1.charAt(0)));
-            ufoSpeed = Integer.parseInt(String.valueOf(l1.charAt(2)));
-            for (int i = 0; i < 5; i++) {
-                br.readLine();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    private void getData() throws SQLException {
+        int[] numbers = Database.selectUserUpdates(connection);
+        coinUpgradeLevel = numbers[0];
+        ufoSpeed = numbers[1];
+
     }
 }

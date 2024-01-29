@@ -6,12 +6,14 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
+import lab.Database;
 import lab.Game.Game;
 import lab.interfaces.GameController;
 import lab.interfaces.StaticScreens;
 
 import java.io.*;
-import java.util.Arrays;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 public class GameOverScreen implements StaticScreens {
     private final Image gameOver;
@@ -21,10 +23,12 @@ public class GameOverScreen implements StaticScreens {
     private final Button playAgain = new Button("Play again");
     private final Button mainMenu = new Button("Main menu");
     private final Button upgrade = new Button("Upgrade");
+    private final Connection conection;
     private boolean block;
-    GameOverScreen(Canvas canvas, Game game) {
+    GameOverScreen(Canvas canvas, Game game, Connection conection) {
         gameOver = new Image("gameOver.png", 1000, canvas.getHeight(), true, true);
         this.root = (Group) canvas.getScene().getRoot();
+        this.conection = conection;
         playAgainClicked = false;
         upgradeWasClicked = false;
         mainMenuWasClicked = false;
@@ -48,7 +52,7 @@ public class GameOverScreen implements StaticScreens {
     }
 
     @Override
-    public void draw(GraphicsContext gc) throws IOException {
+    public void draw(GraphicsContext gc) throws IOException, SQLException {
         gc.drawImage(gameOver, 0, 0);
         if(!block){
             writeBest(game.getScore());
@@ -66,29 +70,8 @@ public class GameOverScreen implements StaticScreens {
         root.getChildren().remove(mainMenu);
         block = false;
     }
-    private void writeBest(int score) throws IOException {
-        String[] specificLine = new String[8];
-        int[] top5 = {0, 0, 0, 0, 0, 0};
-        int cash = 0;
-        try (BufferedReader br = new BufferedReader(new FileReader("mem.txt"))) {
-            specificLine[0] = br.readLine();
-            for(int i = 1; i < 6; i++){
-                specificLine[i] = br.readLine();
-                top5[i - 1] = Integer.parseInt(specificLine[i]);
-            }
-            specificLine[6] = br.readLine();
-            cash = Integer.parseInt(specificLine[6]);
-            top5[5] = score;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        Arrays.sort(top5);
-        BufferedWriter bw = new BufferedWriter(new FileWriter("mem.txt"));
-        bw.write(specificLine[0] + "\n");
-        for(int i = 5; i > 0; i--) bw.write(top5[i] + "\n");
-        cash += game.getCoins();
-        bw.write(Integer.toString(cash));
-        bw.close();
+    private void writeBest(int score) throws SQLException {
+        Database.insertScore(conection, score);
     }
     private void setButtons(){
         playAgain.setLayoutX(20);
