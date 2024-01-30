@@ -17,7 +17,7 @@ public class Database {
         }
     }
     public static void insertUser(Connection connection) throws SQLException {
-        String insertDataSQL = "INSERT INTO userdata (username, money, coinlvl, speedlvl, backgoroundlvl) VALUES (?, ?, ?, ?, ?))";
+        String insertDataSQL = "INSERT INTO userdata (username, money, coinlvl, speedlvl, backgoroundlvl) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement preparedStatement = connection.prepareStatement(insertDataSQL)) {
             preparedStatement.setString(1, "User");
             preparedStatement.setInt(2, 100000);
@@ -99,9 +99,19 @@ public class Database {
         }
     }
     static void deleteData(Connection connection, String name) throws SQLException {
-        String deleteDataSQL = "DELETE FROM score WHERE name = ?";
+        String deleteDataSQL = "DELETE FROM scores WHERE name = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(deleteDataSQL)) {
             preparedStatement.setString(1, name);
+            preparedStatement.executeUpdate();
+        }
+    }
+    public static void dropData(Connection connection) throws SQLException {
+        String deleteDataSQL = "DROP TABLE IF EXISTS userdata";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(deleteDataSQL)) {
+            preparedStatement.executeUpdate();
+        }
+        String dropDataSQL = "DROP TABLE IF EXISTS scores";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(dropDataSQL)) {
             preparedStatement.executeUpdate();
         }
     }

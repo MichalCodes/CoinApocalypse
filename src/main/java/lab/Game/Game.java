@@ -25,13 +25,14 @@ public class Game implements GameController {
     private int many, newObj, score, counter, ufoSpeed, coinUpgradeLevel;
     private final ArrayList<MovingObjects> fireballs = new ArrayList<>();
     private final ArrayList<MovingObjects> coins = new ArrayList<>();
-    private final Image fireballImage, coinImage;
+    private final Image fireballImage, coinImage, shurikenImage;
     private final Random rand = new Random();
     private final Connection connection;
     private boolean end;
     public Game(Canvas canvas, Connection connection) throws SQLException {
         this.fireballImage = new Image(getClass().getResourceAsStream("fire-fireball.gif"), 50, 50, true, true);
         this.coinImage = new Image(getClass().getResourceAsStream("coin.gif"), 50, 50, true, true);
+        this.shurikenImage = new Image(getClass().getResourceAsStream("shuriken.gif"), 50, 50, true, true);
         this.canvas = canvas;
         this.background = new Background(canvas.getWidth(), canvas.getHeight(), connection);
         this.connection = connection;
@@ -45,7 +46,6 @@ public class Game implements GameController {
         this.end = false;
         getData();
     }
-
     private void addObjects(){
         newObj++;
         if(this.newObj == 80){
@@ -53,7 +53,15 @@ public class Game implements GameController {
                 int choice = rand.nextInt(1,3);
                 int Xpos = rand.nextInt(15) * 65;
                 if(choice == 1) this.coins.add(new Coin(Xpos, 50, coinImage));
-                else this.fireballs.add(new Fireball(Xpos, 50, fireballImage));
+                else {
+                    if(background.getAddedBackground() == 2) {
+                        int vote = rand.nextInt(2);
+                        if (vote == 1) this.fireballs.add(new Fireball(Xpos, 50, fireballImage));
+                        else this.fireballs.add(new Fireball(Xpos, 50, shurikenImage));
+                    } else{
+                        this.fireballs.add(new Fireball(Xpos, 50, fireballImage));
+                    }
+                }
             }
             newObj = 0;
         }
@@ -147,6 +155,5 @@ public class Game implements GameController {
         int[] numbers = Database.selectUserUpdates(connection);
         coinUpgradeLevel = numbers[0];
         ufoSpeed = numbers[1];
-
     }
 }

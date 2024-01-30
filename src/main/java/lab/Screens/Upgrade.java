@@ -122,7 +122,7 @@ public class Upgrade implements StaticScreens {
     private void getData() throws SQLException {
         int[] numbers;
         numbers = Database.selectUserUpdates(connection);
-        coins = selectUserCoins(connection);
+        coins = Database.selectUserCoins(connection);
         coinUpgradeLevel = numbers[0];
         speedUpgradeLevel = numbers[1];
         addedBackground = numbers[2];

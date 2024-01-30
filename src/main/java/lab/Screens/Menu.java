@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-
+//todo dopln prihlasovani
 public class Menu implements StaticScreens {
     private final GameController game;
     private final Connection conection;
@@ -27,10 +27,9 @@ public class Menu implements StaticScreens {
     private final Group root;
     public Menu(Canvas canvas) throws SQLException {
         this.conection = DriverManager.getConnection("jdbc:h2:./scoreDB;AUTO_SERVER=TRUE");
+        //Database.dropData(conection);
         Database.createDefaults(conection);
-        if(Database.find(conection) < 1){
-            Database.insertUser(conection);
-        }
+        if(Database.find(conection) < 1) Database.insertUser(conection);
         this.canvas = canvas;
         this.root = (Group) canvas.getScene().getRoot();
         this.game = new Game(canvas, conection);
@@ -41,7 +40,6 @@ public class Menu implements StaticScreens {
         this.upgrades = new Upgrade(root, conection);
         this.topScore = new TopScores(conection, root);
         setButtons();
-
     }
     @Override
     public int checkMouseEvents() {
@@ -56,7 +54,6 @@ public class Menu implements StaticScreens {
         topScores.setOnAction(e -> showTopScores = true);
         return 0;
     }
-
     @Override
     public void draw(GraphicsContext gc) throws IOException, SQLException {
         //zmeny

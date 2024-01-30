@@ -38,6 +38,12 @@ public class Background implements GameBackground{
     }
     @Override
     public int getLifes() {return this.lifes;}
+
+    @Override
+    public int getAddedBackground() { //todo dores abz se penize pricitali
+        return addedBackground;
+    }
+
     @Override
     public void setScore(GraphicsContext gc, int score){
         String scoreNumber = Integer.toString(score);
