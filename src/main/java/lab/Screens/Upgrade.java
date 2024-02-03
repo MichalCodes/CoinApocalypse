@@ -17,7 +17,7 @@ import static lab.Database.selectUserCoins;
 
 public class Upgrade implements StaticScreens {
     private final Button upgradeCoins = new Button("Upgrade coins");
-    private final Button restartAll = new Button("Restartovat postup");
+    private final Button restartAll = new Button("Restartovat vše");
     private final Button upgradeSpeed = new Button("Upgrade speed");
     private final Button addBackground = new Button("Add background");
     private final Button back = new Button("Back to menu");
@@ -56,7 +56,7 @@ public class Upgrade implements StaticScreens {
             addedBackground = 1;
         });
         addBackground.setOnAction(e-> {
-            if(addedBackground < 2 && coins > 10000){
+            if(addedBackground < 3 && coins > 10000 * addedBackground){
                 coins -= 10000;
                 addedBackground++;
             }
@@ -92,8 +92,8 @@ public class Upgrade implements StaticScreens {
         if(speedUpgradeLevel < 4){
             gc.fillText("cost: " + (500 * speedUpgradeLevel), 320, 400);
         }
-        if(addedBackground < 2){
-            gc.fillText("cost: " + 10000, 500, 400);
+        if(addedBackground < 3){
+            gc.fillText("cost: " + (10000 * addedBackground), 500, 400);
         }
         if(!block){
             getData();

@@ -4,6 +4,7 @@ import javafx.scene.Group;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import lab.Database;
 import lab.Game.Game;
@@ -13,7 +14,8 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-//todo dopln prihlasovani
+import java.util.Objects;
+//todo udelej to jako jednouser a jeb na to
 public class Menu implements StaticScreens {
     private final GameController game;
     private final Connection conection;
@@ -29,6 +31,7 @@ public class Menu implements StaticScreens {
         this.conection = DriverManager.getConnection("jdbc:h2:./scoreDB;AUTO_SERVER=TRUE");
         //Database.dropData(conection);
         Database.createDefaults(conection);
+        Database.setActualUser("User");
         if(Database.find(conection) < 1) Database.insertUser(conection);
         this.canvas = canvas;
         this.root = (Group) canvas.getScene().getRoot();
@@ -41,17 +44,23 @@ public class Menu implements StaticScreens {
         this.topScore = new TopScores(conection, root);
         setButtons();
     }
+
     @Override
     public int checkMouseEvents() {
-        play.setOnAction(e -> {gameWasStarted = true;
+        play.setOnAction(e -> {
+            gameWasStarted = true;
             try {
                 game.newGame();
             } catch (SQLException ex) {
                 throw new RuntimeException(ex);
             }
         });
-        upgrade.setOnAction(e -> {showUpgrades = true;});
-        topScores.setOnAction(e -> showTopScores = true);
+        upgrade.setOnAction(e -> {
+            showUpgrades = true;
+        });
+        topScores.setOnAction(e -> {
+            showTopScores = true;
+        });
         return 0;
     }
     @Override

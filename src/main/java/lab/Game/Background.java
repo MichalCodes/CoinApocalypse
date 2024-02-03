@@ -10,7 +10,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public class Background implements GameBackground{
-    private final Image image1, image2;
+    private final Image image1, image2, image3;
     private final Connection connection;
     private final Image srdce;
     private String coinNumber;
@@ -24,6 +24,7 @@ public class Background implements GameBackground{
         this.getData();
         this.image2 = new Image("background2.png", width, height - 50, true, true);
         this.image1 = new Image("background.png", width, height - 50, true, true);
+        this.image3 = new Image("winter.png", width, height - 50, true, true);
         this.srdce = new Image("srdce.png", 50, 50, true, true);
         this.lifes = 3;
     }
@@ -40,7 +41,7 @@ public class Background implements GameBackground{
     public int getLifes() {return this.lifes;}
 
     @Override
-    public int getAddedBackground() { //todo dores abz se penize pricitali
+    public int getAddedBackground() {
         return addedBackground;
     }
 
@@ -72,8 +73,10 @@ public class Background implements GameBackground{
         }
         if(addedBackground == 2){
             gc.drawImage(image2, 0, 50, 1000, 500);
+        } else if (addedBackground == 3){
+            gc.drawImage(image3, 0, 50, 1000, 500);
         } else {
-            gc.drawImage(image1, 0, 50);
+            gc.drawImage(image1, 0, 50, 1000, 500);
         }
 
         for (int i = 0; i < this.lifes; i++){

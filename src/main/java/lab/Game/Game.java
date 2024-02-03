@@ -25,7 +25,7 @@ public class Game implements GameController {
     private int many, newObj, score, counter, ufoSpeed, coinUpgradeLevel;
     private final ArrayList<MovingObjects> fireballs = new ArrayList<>();
     private final ArrayList<MovingObjects> coins = new ArrayList<>();
-    private final Image fireballImage, coinImage, shurikenImage;
+    private final Image fireballImage, coinImage, shurikenImage, snowflakeImage, x2Image;
     private final Random rand = new Random();
     private final Connection connection;
     private boolean end;
@@ -33,6 +33,8 @@ public class Game implements GameController {
         this.fireballImage = new Image(getClass().getResourceAsStream("fire-fireball.gif"), 50, 50, true, true);
         this.coinImage = new Image(getClass().getResourceAsStream("coin.gif"), 50, 50, true, true);
         this.shurikenImage = new Image(getClass().getResourceAsStream("shuriken.gif"), 50, 50, true, true);
+        this.snowflakeImage = new Image(getClass().getResourceAsStream("vlocka.gif"), 60, 60, true, true);
+        this.x2Image = new Image(getClass().getResourceAsStream("x2.gif"), 60, 60, true, true);
         this.canvas = canvas;
         this.background = new Background(canvas.getWidth(), canvas.getHeight(), connection);
         this.connection = connection;
@@ -52,13 +54,19 @@ public class Game implements GameController {
             for (int i = 0; i <= rand.nextInt(2); i++){
                 int choice = rand.nextInt(1,3);
                 int Xpos = rand.nextInt(15) * 65;
-                if(choice == 1) this.coins.add(new Coin(Xpos, 50, coinImage));
+                int randx2 = rand.nextInt(50);
+                if(randx2 == 30) this.coins.add(new Coin(Xpos, 50, x2Image));
+                if(choice == 1) this.coins.add(new Coin(Xpos, 50, coinImage, true));
                 else {
                     if(background.getAddedBackground() == 2) {
                         int vote = rand.nextInt(2);
                         if (vote == 1) this.fireballs.add(new Fireball(Xpos, 50, fireballImage));
                         else this.fireballs.add(new Fireball(Xpos, 50, shurikenImage));
-                    } else{
+                    } else if (background.getAddedBackground() == 3){
+                        int vote = rand.nextInt(2);
+                        if (vote == 1) this.fireballs.add(new Fireball(Xpos, 50, fireballImage));
+                        else this.fireballs.add(new Fireball(Xpos, 50, snowflakeImage));
+                    } else {
                         this.fireballs.add(new Fireball(Xpos, 50, fireballImage));
                     }
                 }
@@ -89,9 +97,13 @@ public class Game implements GameController {
                     coins.remove(i);
                     i--;
                 } else if (coin.isCollected(coin, ufo)) {
+                    if(((Coin) coins.get(i)).getSupercoin() == false){
+                        coinUpgradeLevel = 2 * coinUpgradeLevel;
+                    }
                     coins.remove(i);
                     i--;
                     this.many += coinUpgradeLevel;
+
                     background.setCoins(canvas.getGraphicsContext2D(), many);
                 }
             }
@@ -138,9 +150,9 @@ public class Game implements GameController {
     @Override
     public void newGame() throws SQLException {
         background.resetLifes();
+        background.setCoins(canvas.getGraphicsContext2D(), many);
         many = 0;
         score = 0;
-        background.setCoins(canvas.getGraphicsContext2D(), many);
         end = false;
         getData();
     }

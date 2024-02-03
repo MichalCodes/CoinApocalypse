@@ -56,8 +56,6 @@ public class GameOverScreen implements StaticScreens {
         gc.drawImage(gameOver, 0, 0);
         if(!block){
             writeBest(game.getScore());
-            int cash = Database.selectUserCoins(conection);
-            Database.updateUserCoins(conection, cash + game.getCoins());
             root.getChildren().add(playAgain);
             root.getChildren().add(upgrade);
             root.getChildren().add(mainMenu);
@@ -65,6 +63,8 @@ public class GameOverScreen implements StaticScreens {
         }
         gc.setFill(Color.BLACK);
         gc.fillText("Your score: " + game.getScore(), 300, 400);
+        int cash = Database.selectUserCoins(conection);
+        Database.updateUserCoins(conection, cash + game.getCoins());
     }
     public void removeButtons(){
         root.getChildren().remove(playAgain);
